@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>文章自然化ツール</title>
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <main class="container">
@@ -12,7 +12,7 @@
     <!-- 1. タイトル・説明 -->
     <header class="header">
       <h1>文章自然化ツール</h1>
-      <p>AIが書いた文章や硬すぎる文章を、登録した置換ルールと文体設定にもとづいて、自然で読みやすい文章に整えます。</p>
+      <p>AIが書いた文章や硬すぎる文章を、登録した置換ルールと文体設定にもとづいて、自然で読みやすい文章に整えます。すべて無料・このブラウザの中だけで動きます。</p>
       <p class="note">※文章の読みやすさや自分らしい表現への改善が目的です。AI判定ツールの回避を保証するものではありません。</p>
     </header>
 
@@ -66,7 +66,7 @@
 
     <!-- 4. 文体選択 -->
     <section class="card">
-      <h2>③ 文体・変換方法</h2>
+      <h2>③ 文体</h2>
       <div class="settings">
         <label class="field">
           <span>文体</span>
@@ -83,23 +83,44 @@
           <label><input type="radio" name="ending" value="desumasu"> です・ます調</label>
         </fieldset>
       </div>
-      <label class="check">
-        <input id="useAI" type="checkbox">
-        AIで文章全体を自然化する（文脈に合わせてルールを適用）
-      </label>
-      <p id="aiStatus" class="muted small"></p>
+      <p class="muted small">文体の指定は「B. Claude.aiで自然化」の依頼文に使われます。</p>
     </section>
 
     <!-- 5. 変換ボタン -->
-    <div class="convert">
-      <button id="convertBtn" class="btn btn-primary" type="button">変換する</button>
+    <section class="card">
+      <h2>④ 変換する</h2>
+      <div class="methods">
+        <div class="method">
+          <h3>A. 置換ルールだけ適用</h3>
+          <p class="muted small">登録したルールをそのまま置き換えます。すぐに終わりますが、文脈は考慮しません（例:「全ての」→「全の」）。</p>
+          <button id="convertBtn" class="btn btn-primary" type="button">置換ルールを適用</button>
+        </div>
+        <div class="method">
+          <h3>B. Claude.aiで自然化（無料）</h3>
+          <ol class="steps small">
+            <li>依頼文（指示・文体・置換ルール・文章）をコピー
+              <div class="row wrap">
+                <button id="copyPromptBtn" class="btn btn-primary" type="button">依頼文をコピー</button>
+                <a class="btn btn-ghost" href="https://claude.ai/new" target="_blank" rel="noopener">Claude.ai を開く</a>
+              </div>
+            </li>
+            <li>Claude.ai のチャット欄に貼り付けて送信</li>
+            <li>返ってきた文章をここに貼り付けて比較
+              <textarea id="aiResultText" rows="5" placeholder="Claude.ai が返した文章を貼り付け"></textarea>
+              <div class="row">
+                <button id="compareBtn" class="btn" type="button">比較する</button>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </div>
       <p id="message" class="message hidden" role="status"></p>
-    </div>
+    </section>
 
     <!-- 6. 変換前後の比較画面 -->
     <section id="resultSection" class="card hidden">
       <div class="card-head">
-        <h2>④ 変換結果</h2>
+        <h2>⑤ 変換結果</h2>
         <span id="resultMeta" class="muted"></span>
       </div>
       <div class="compare">
@@ -131,7 +152,13 @@
 
   </main>
 
-  <script src="/vendor/diff.js"></script>
-  <script type="module" src="/js/app.js"></script>
+  <!-- 読み込み順に意味があります（後のファイルが前のファイルを使う） -->
+  <script src="vendor/diff.min.js"></script>
+  <script src="js/rules-core.js"></script>
+  <script src="js/prompt.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/diff-view.js"></script>
+  <script src="js/rules-ui.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>

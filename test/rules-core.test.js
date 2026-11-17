@@ -1,6 +1,6 @@
-import { test } from 'node:test';
-import assert from 'node:assert/strict';
-import { applyRules, parseBulk, normalizeRules } from '../public/js/rules-core.js';
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const { applyRules, parseBulk, normalizeRules } = require('../js/rules-core.js');
 
 const r = (from, to, enabled = true) => ({ id: from, from, to, enabled });
 

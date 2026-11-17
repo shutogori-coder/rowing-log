@@ -1,20 +1,22 @@
 // =============================================================
 // 置換ルールの「計算」部分（画面操作とは分離。テストしやすいように純粋な関数だけ）
 // ルール1件の形: { id: string, from: string, to: string, enabled: boolean }
+// ブラウザでは App.RulesCore として使える（テストでは require で読み込む）
 // =============================================================
+(function (root) {
 
-export const DEFAULT_RULES = [
+const DEFAULT_RULES = [
   { from: '全て', to: '全' },
   { from: 'さまざまな', to: 'いろいろな' },
   { from: '重要である', to: '重要だ' },
   { from: '推進する', to: '進める' },
 ];
 
-export function newId() {
+function newId() {
   return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 }
 
-export function makeRule(from, to, enabled = true) {
+function makeRule(from, to, enabled = true) {
   return { id: newId(), from: String(from).trim(), to: String(to).trim(), enabled };
 }
 
@@ -26,7 +28,7 @@ const SEPARATORS = ['→', '->', '=>', '\t', ',', '，'];
  * 例: 「全て→全」「さまざまな,いろいろな」
  * @returns {{rules: {from,to}[], errors: string[]}}
  */
-export function parseBulk(text) {
+function parseBulk(text) {
   const rules = [];
   const errors = [];
   text.split(/\r?\n/).forEach((rawLine, i) => {
@@ -59,7 +61,7 @@ function escapeRegExp(s) {
  * - 1回の走査で置換するので、置換後の文字がさらに置換されることはない
  * @returns {{text: string, hits: {from,to,count}[]}}
  */
-export function applyRules(text, rules) {
+function applyRules(text, rules) {
   const active = rules.filter((r) => r.enabled !== false && r.from);
   if (!active.length) return { text, hits: [] };
 
@@ -81,7 +83,7 @@ export function applyRules(text, rules) {
 }
 
 /** 保存データなどから読んだルール配列を正しい形にそろえる */
-export function normalizeRules(list) {
+function normalizeRules(list) {
   if (!Array.isArray(list)) return [];
   return list
     .filter((r) => r && typeof r.from === 'string' && r.from.trim())
@@ -92,3 +94,9 @@ export function normalizeRules(list) {
       enabled: r.enabled !== false,
     }));
 }
+
+const api = { DEFAULT_RULES, newId, makeRule, parseBulk, applyRules, normalizeRules };
+root.App = root.App || {};
+root.App.RulesCore = api;
+if (typeof module === 'object' && module.exports) module.exports = api;
+})(typeof window !== 'undefined' ? window : globalThis);

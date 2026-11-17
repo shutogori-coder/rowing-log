@@ -1,8 +1,9 @@
 // =============================================================
 // 置換ルールの画面操作（追加・編集・削除・一括登録・書き出し・読み込み）
 // =============================================================
-import { DEFAULT_RULES, makeRule, parseBulk } from './rules-core.js';
-import { loadRules, saveRules, exportToFile, importFromFile } from './storage.js';
+(function (App) {
+const { DEFAULT_RULES, makeRule, parseBulk } = App.RulesCore;
+const { loadRules, saveRules, exportToFile, importFromFile } = App.Storage;
 
 const $ = (id) => document.getElementById(id);
 
@@ -12,7 +13,7 @@ let onImportSettings = () => {};
 let getSettings = () => ({});
 
 /** 現在のルール一覧を返す */
-export const getRules = () => rules;
+const getRules = () => rules;
 
 function commit() {
   if (!saveRules(rules)) notify('ルールを保存できませんでした（ブラウザの保存機能が無効の可能性があります）。', 'error');
@@ -102,7 +103,7 @@ function upsert(list) {
   return { added, updated };
 }
 
-export function initRulesUI(options) {
+function initRulesUI(options) {
   notify = options.notify;
   onImportSettings = options.onImportSettings;
   getSettings = options.getSettings;
@@ -160,3 +161,6 @@ export function initRulesUI(options) {
     notify('初期ルールに戻しました。', 'ok');
   });
 }
+
+App.RulesUI = { initRulesUI, getRules };
+})(window.App);
