@@ -1,0 +1,9 @@
+{
+  "name": "text-naturalizer",
+  "version": "1.0.0",
+  "description": "文章自然化・表現置換ツール（無料・サーバー不要）",
+  "private": true,
+  "scripts": {
+    "test": "node --test"
+  }
+}

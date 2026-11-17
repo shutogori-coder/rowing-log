@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>文章自然化ツール</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="container">
+
+    <!-- 1. タイトル・説明 -->
+    <header class="header">
+      <h1>文章自然化ツール</h1>
+      <p>AIが書いた文章や硬すぎる文章を、登録した置換ルールと文体設定にもとづいて、自然で読みやすい文章に整えます。すべて無料・このブラウザの中だけで動きます。</p>
+      <p class="note">※文章の読みやすさや自分らしい表現への改善が目的です。AI判定ツールの回避を保証するものではありません。</p>
+    </header>
+
+    <!-- 2. 文章入力エリア -->
+    <section class="card">
+      <div class="card-head">
+        <h2>① 変換したい文章</h2>
+        <span id="charCount" class="muted">0 文字</span>
+      </div>
+      <textarea id="inputText" rows="10" placeholder="ここに文章を貼り付けてください"></textarea>
+      <div class="row">
+        <button id="clearInputBtn" class="btn btn-ghost" type="button">入力をクリア</button>
+      </div>
+    </section>
+
+    <!-- 3. 置換ルール設定 -->
+    <section class="card">
+      <div class="card-head">
+        <h2>② 置換ルール</h2>
+        <span id="ruleCount" class="muted"></span>
+      </div>
+
+      <form id="addRuleForm" class="add-rule">
+        <input id="newFrom" type="text" placeholder="置換前（例: さまざまな）" aria-label="置換前" required>
+        <span class="arrow">→</span>
+        <input id="newTo" type="text" placeholder="置換後（例: いろいろな）" aria-label="置換後">
+        <button class="btn" type="submit">追加</button>
+      </form>
+
+      <ul id="ruleList" class="rule-list"></ul>
+      <p id="ruleEmpty" class="muted hidden">ルールはまだありません。</p>
+
+      <details class="bulk">
+        <summary>まとめて登録する</summary>
+        <p class="muted">1行に1つ、「置換前→置換後」または「置換前,置換後」の形で入力してください。</p>
+        <textarea id="bulkText" rows="5" placeholder="全て→全&#10;さまざまな→いろいろな&#10;推進する,進める"></textarea>
+        <div class="row">
+          <button id="bulkAddBtn" class="btn" type="button">一括登録</button>
+        </div>
+      </details>
+
+      <div class="row wrap">
+        <button id="exportBtn" class="btn btn-ghost" type="button">ルールを書き出し</button>
+        <label class="btn btn-ghost file-btn">ルールを読み込み
+          <input id="importFile" type="file" accept="application/json,.json">
+        </label>
+        <button id="resetRulesBtn" class="btn btn-ghost" type="button">初期ルールに戻す</button>
+      </div>
+      <p class="muted small">ルールと設定はこのブラウザに自動保存されます。</p>
+    </section>
+
+    <!-- 4. 文体選択 -->
+    <section class="card">
+      <h2>③ 文体</h2>
+      <div class="settings">
+        <label class="field">
+          <span>文体</span>
+          <select id="styleSelect">
+            <option value="report">大学生のレポート風</option>
+            <option value="thesis">卒業論文風</option>
+            <option value="business">ビジネス文章風</option>
+            <option value="plain">一般的で読みやすい文章</option>
+          </select>
+        </label>
+        <fieldset class="field">
+          <legend>文末表現</legend>
+          <label><input type="radio" name="ending" value="dearu"> である調</label>
+          <label><input type="radio" name="ending" value="desumasu"> です・ます調</label>
+        </fieldset>
+      </div>
+      <p class="muted small">文体の指定は「B. Claude.aiで自然化」の依頼文に使われます。</p>
+    </section>
+
+    <!-- 5. 変換ボタン -->
+    <section class="card">
+      <h2>④ 変換する</h2>
+      <div class="methods">
+        <div class="method">
+          <h3>A. 置換ルールだけ適用</h3>
+          <p class="muted small">登録したルールをそのまま置き換えます。すぐに終わりますが、文脈は考慮しません（例:「全ての」→「全の」）。</p>
+          <button id="convertBtn" class="btn btn-primary" type="button">置換ルールを適用</button>
+        </div>
+        <div class="method">
+          <h3>B. Claude.aiで自然化（無料）</h3>
+          <ol class="steps small">
+            <li>依頼文（指示・文体・置換ルール・文章）をコピー
+              <div class="row wrap">
+                <button id="copyPromptBtn" class="btn btn-primary" type="button">依頼文をコピー</button>
+                <a class="btn btn-ghost" href="https://claude.ai/new" target="_blank" rel="noopener">Claude.ai を開く</a>
+              </div>
+            </li>
+            <li>Claude.ai のチャット欄に貼り付けて送信</li>
+            <li>返ってきた文章をここに貼り付けて比較
+              <textarea id="aiResultText" rows="5" placeholder="Claude.ai が返した文章を貼り付け"></textarea>
+              <div class="row">
+                <button id="compareBtn" class="btn" type="button">比較する</button>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </div>
+      <p id="message" class="message hidden" role="status"></p>
+    </section>
+
+    <!-- 6. 変換前後の比較画面 -->
+    <section id="resultSection" class="card hidden">
+      <div class="card-head">
+        <h2>⑤ 変換結果</h2>
+        <span id="resultMeta" class="muted"></span>
+      </div>
+      <div class="compare">
+        <div>
+          <h3>変換前</h3>
+          <div id="beforeView" class="text-view"></div>
+        </div>
+        <div>
+          <h3>変換後</h3>
+          <div id="afterView" class="text-view"></div>
+        </div>
+      </div>
+      <p class="legend small"><span class="diff-del">削除・変更された部分</span> <span class="diff-add">追加・変更後の部分</span></p>
+
+      <h3>変更内容の一覧</h3>
+      <table class="changes">
+        <thead><tr><th>変更前</th><th></th><th>変更後</th><th>種類・理由</th></tr></thead>
+        <tbody id="changeList"></tbody>
+      </table>
+      <p id="noChanges" class="muted hidden">変更はありませんでした。</p>
+
+      <!-- 7. コピー・リセットボタン -->
+      <div class="row wrap actions">
+        <button id="copyBtn" class="btn btn-primary" type="button">変換後の文章をコピー</button>
+        <button id="applyBtn" class="btn" type="button">変換後を入力欄に反映</button>
+        <button id="restoreBtn" class="btn btn-ghost" type="button">元の文章に戻す</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 読み込み順に意味があります（後のファイルが前のファイルを使う） -->
+  <script src="vendor/diff.min.js"></script>
+  <script src="js/rules-core.js"></script>
+  <script src="js/prompt.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/diff-view.js"></script>
+  <script src="js/rules-ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
